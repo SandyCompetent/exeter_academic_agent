@@ -1,4 +1,5 @@
-name: Deploy Flutter Web / Mobile
+name: Deploy Flutter Web and Android
+
 on:
   push:
     branches:
@@ -6,12 +7,19 @@ on:
 
 permissions:
   contents: write
+  pages: write
+  id-token: write
 
 jobs:
-  build:
+  build-and-deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
+
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
 
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
@@ -25,24 +33,24 @@ jobs:
       - name: Build Web
         run: flutter build web --release --base-href "/exeter_academic_agent/"
 
-      - name: Deploy to GitHub Pages
-        uses: JamesIves/github-pages-deploy-action@v4
-        with:
-          branch: gh-pages
-          folder: build/web
-
       - name: Build Android APK
         run: flutter build apk --debug
 
       - name: Upload APK to Release
         uses: softprops/action-gh-release@v2
-        if: github.ref == 'refs/heads/main'
         with:
           tag_name: latest
           files: build/app/outputs/flutter-apk/app-debug.apk
           name: Latest Build
           body: "Automatic build from the latest commit."
-          draft: false
-          prerelease: false
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: build/web
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
