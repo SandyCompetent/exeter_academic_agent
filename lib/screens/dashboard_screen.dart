@@ -92,7 +92,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
           final chat = model.startChat();
           final response = await chat.sendMessage(
             Content.text(
-              "What is the typical schedule or next expected time for the Stagecoach UNI or 4 bus from the University of Exeter right now? Respond with just a short phrase like 'In 10 mins' or 'Every 15 mins'.",
+              "What is the typical schedule or next expected time for the Stagecoach UNI or 4 bus or 4A bus from the University of Exeter right now? Respond with just a short phrase like 'In 10 mins' or 'Every 15 mins'.",
             ),
           );
 
@@ -169,7 +169,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   subtitle: 'Powered by Open-Meteo',
                 ),
                 DashboardCard(
-                  title: 'Next Bus 4 to Campus',
+                  title: 'Next Bus 4/4A to Campus',
                   value: data['bus'],
                   icon: Icons.directions_bus,
                   subtitle: 'Stagecoach Schedule (AI Powered)',

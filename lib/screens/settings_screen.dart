@@ -188,7 +188,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 FilledButton.icon(
                   // Currently directs to your GitHub releases page, where you can host the built .apk file
                   onPressed: () => _launchUrl(
-                    'https://github.com/SandyCompetent/exeter_academic_agent/releases/latest/download/app-release.apk',
+                    'https://github.com/SandyCompetent/exeter_academic_agent/releases/latest/download/app-debug.apk',
                   ),
                   icon: const Icon(Icons.download),
                   label: const Text('APK'),

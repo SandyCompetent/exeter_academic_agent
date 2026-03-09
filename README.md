@@ -16,7 +16,7 @@ A production-ready Agentic Study Assistant built for students at the University 
 - **Library Occupancy**: Time-aware estimates for Forum and St Luke's library capacity to help you find a study spot.
 
 ### 3. Developer Features
-- **Model Selector**: Easily switch between `gemini-1.5-pro`, `gemini-1.5-flash`, and the latest `gemini-3-flash-preview`.
+- **Model Selector**: Easily switch between `gemini-2.5-pro`, `gemini-2.5-flash`, and the latest model.
 - **Modular Architecture**: Clean separation of concerns (Services, Providers, Models, Widgets) making the code easy to maintain and scale.
 - **Cross-Platform**: Fully responsive design that works on Android, iOS, and Web.
 
