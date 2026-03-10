@@ -92,7 +92,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
           final chat = model.startChat();
           final response = await chat.sendMessage(
             Content.text(
-              "What is the typical schedule or next expected time for the Stagecoach UNI or 4 bus or 4A bus from the University of Exeter right now? Respond with just a short phrase like 'In 10 mins' or 'Every 15 mins'.",
+              "What is the typical schedule or next expected time for the Stagecoach UNI or 4 bus or 4A bus from the University of Exeter right now? Respond with just a short phrase like 'In 10 mins' or 'Every 15 mins', also specifies time in HH:mm format (24 hours format) of next expected bus timing.",
             ),
           );
 

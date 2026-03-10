@@ -12,7 +12,7 @@ A production-ready Agentic Study Assistant built for students at the University 
 
 ### 2. Campus Live Dashboard
 - **Live Weather**: Real-time weather updates specifically for Exeter (Streatham/St Luke's) using Open-Meteo data.
-- **AI Bus ETA**: Uses Gemini to analyze current schedules and provide live estimates for Stagecoach routes (D and 4) to campus.
+- **AI Bus ETA**: Uses Gemini to analyze current schedules and provide live estimates for Stagecoach routes (4 and 4A) to campus.
 - **Library Occupancy**: Time-aware estimates for Forum and St Luke's library capacity to help you find a study spot.
 
 ### 3. Developer Features
