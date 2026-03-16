@@ -42,7 +42,7 @@ class GeminiService {
   Future<List<String>> generateSuggestions(String lastAssistantResponse) async {
     try {
       final suggestionModel = GenerativeModel(
-        model: 'gemini-3-flash-preview',
+        model: 'gemini-2.5-flash-lite',
         apiKey: apiKey,
       );
 
