@@ -7,7 +7,7 @@
 [![Live Demo](https://img.shields.io/badge/demo-live-brightgreen.svg)](https://sandycompetent.github.io/exeter_academic_agent/)
 
 <p align="center">
-  <img src="output/output.gif" alt="Exeter Academic Agent Demo" width="300"/>
+  <img src="output/output.gif" alt="Exeter Academic Agent Demo" width="100%"/>
 </p>
 
 A high-performance **LLM-Agentic Study Assistant** built with Flutter and Google Gemini. This project showcases modern AI engineering patterns, including real-time stream processing, agentic "thought" orchestration, and multi-model routing for academic workflows at the University of Exeter.
