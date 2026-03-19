@@ -45,4 +45,4 @@ app.*.map.json
 /android/app/release
 
 # Dont push output folder
-/output
+#/output
