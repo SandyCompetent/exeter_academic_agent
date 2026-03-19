@@ -3,6 +3,7 @@
 [![Deploy Flutter Web and Android](https://github.com/sandycompetent/exeter_academic_agent/actions/workflows/deploy.yml/badge.svg)](https://github.com/sandycompetent/exeter_academic_agent/actions/workflows/deploy.yml)
 [![Flutter](https://img.shields.io/badge/Flutter-%3E%3D3.11-02569B?logo=flutter&logoColor=white)](https://flutter.dev)
 [![Gemini](https://img.shields.io/badge/Gemini-AI-orange?logo=google-gemini&logoColor=white)](https://ai.google.dev/)
+[![Model](https://img.shields.io/badge/Model-Gemini%202.5%20Pro%20%2F%20Flash-blue)](https://ai.google.dev/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Live Demo](https://img.shields.io/badge/demo-live-brightgreen.svg)](https://sandycompetent.github.io/exeter_academic_agent/)
 
@@ -10,7 +11,7 @@
   <img src="output/output.gif" alt="Exeter Academic Agent Demo" width="100%"/>
 </p>
 
-A high-performance **LLM-Agentic Study Assistant** built with Flutter and Google Gemini. This project showcases modern AI engineering patterns, including real-time stream processing, agentic "thought" orchestration, and multi-model routing for academic workflows at the University of Exeter.
+This project implements a production-style **Agentic AI pipeline** on top of Google Gemini 2.5. The agent orchestrates multi-step reasoning with a visible "thinking" phase, dynamic model routing between Pro and Flash-Lite based on task complexity, and a secondary LLM observer pass for contextual follow-up generation. Token-by-token streaming delivers low-latency responses via async Dart streams, deployed as a cross-platform Flutter app (Web + Android) with CI/CD via GitHub Actions.
 
 ## 🎯 Why I Built This
 This project was born out of a desire to move beyond simple "GPT-wrappers" and explore the potential of **Agentic AI** in a specialized, high-stakes environment: Higher Education. 
@@ -30,8 +31,8 @@ This isn't just a "wrapper app." It implements several advanced LLM patterns:
 - **Agentic Orchestration**: The assistant uses a multi-step "Thinking" phase to determine the best response strategy before execution.
 - **Token-by-Token Streaming**: Low-latency UI updates using asynchronous Dart streams for a responsive "real-time" feel.
 - **Dynamic Tool Use & Context Injection**: Integrated system instructions that ground the agent in the University of Exeter's academic context.
-- **Automated Follow-up Generation**: An secondary "observer" LLM pass (using `gemini-2.5-flash-lite`) to generate contextual suggestions and maintain conversation flow.
-- **Model Routing**: Dynamic selection between specialized models (Pro vs Flash) based on task complexity and cost/latency requirements.
+- **Automated Follow-up Generation**: A secondary "observer" LLM pass (using `gemini-2.5-flash-lite`) to generate contextual suggestions and maintain conversation flow.
+- **Model Routing**: Dynamic selection between specialized models (Pro vs Flash-Lite) based on task complexity and cost/latency requirements.
 
 ## 🚀 Features
 
@@ -49,7 +50,9 @@ This isn't just a "wrapper app." It implements several advanced LLM patterns:
 
 - **Framework**: [Flutter](https://flutter.dev) (v3.11+)
 - **AI Engine**: [Google Gemini SDK](https://pub.dev/packages/google_generative_ai) (v0.4.7)
+- **Models**: `gemini-2.5-pro` (Reasoning), `gemini-2.5-flash-lite` (Suggestions)
 - **State Management**: [Provider](https://pub.dev/packages/provider) for clean architecture and reactive state.
+- **External APIs**: [Open-Meteo API](https://open-meteo.com/) for real-time campus weather data.
 - **CI/CD**: GitHub Actions for automated Web deployment and Android APK generation.
 - **Security**: Secure API key management via `--dart-define` env variables.
 
