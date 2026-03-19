@@ -19,25 +19,114 @@ class DashboardScreen extends StatefulWidget {
 }
 
 class _DashboardScreenState extends State<DashboardScreen> {
-  late Stream<Map<String, dynamic>> _dataStream;
+  StreamController<Map<String, dynamic>>? _controller;
+  Timer? _timer;
   String? _lastApiKey;
   String? _lastModel;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = StreamController<Map<String, dynamic>>.broadcast();
+  }
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
     final settings = Provider.of<AppSettings>(context);
 
-    // Prevent the stream from restarting on minor UI rebuilds
-    if (_lastApiKey != settings.apiKey ||
-        _lastModel != settings.selectedModel) {
+    if (_lastApiKey != settings.apiKey || _lastModel != settings.selectedModel) {
       _lastApiKey = settings.apiKey;
       _lastModel = settings.selectedModel;
-      _dataStream = _fetchExeterData(_lastApiKey!, _lastModel!);
+      _restartFetch();
     }
   }
 
-  // Maps WMO weather codes to readable text and emojis
+  @override
+  void dispose() {
+    _timer?.cancel();
+    _controller?.close();
+    super.dispose();
+  }
+
+  void _restartFetch() {
+    _timer?.cancel();
+    _fetchOnce(); // Initial fetch
+    _timer = Timer.periodic(const Duration(seconds: 60), (timer) {
+      _fetchOnce();
+    });
+  }
+
+  Future<void> _fetchOnce() async {
+    if (_controller == null || _controller!.isClosed) return;
+
+    final apiKey = _lastApiKey ?? '';
+    final modelName = _lastModel ?? 'gemini-1.5-flash';
+
+    String weatherStr = 'Fetching...';
+    String busETA = 'Loading...';
+
+    // Fetch weather
+    try {
+      final res = await http.get(
+        Uri.parse(
+          'https://api.open-meteo.com/v1/forecast?latitude=50.7352&longitude=-3.5328&current_weather=true',
+        ),
+      );
+      if (res.statusCode == 200) {
+        final data = jsonDecode(res.body);
+        final temp = data['current_weather']['temperature'];
+        final code = data['current_weather']['weathercode'];
+        weatherStr = '$temp°C, ${_getWeatherEmoji(code)}';
+      } else {
+        weatherStr = 'Unavailable';
+      }
+    } catch (e) {
+      weatherStr = 'Offline';
+    }
+
+    // Fetch bus schedule estimates using Gemini
+    if (apiKey.trim().isEmpty) {
+      busETA = 'API Key required (Check Settings)';
+    } else {
+      try {
+        final model = GenerativeModel(
+          model: modelName,
+          apiKey: apiKey,
+          systemInstruction: Content.system(
+            'You are an assistant providing transit schedule insights for the University of Exeter. '
+            'Provide an extremely concise output. No pleasantries.',
+          ),
+        );
+        final chat = model.startChat();
+        final response = await chat.sendMessage(
+          Content.text(
+            "What is the typical schedule or next expected time for the Stagecoach UNI or 4 bus or 4A bus from the University of Exeter right now? Respond with just a short phrase like 'In 10 mins' or 'Every 15 mins', also specifies time in HH:mm format (24 hours format) of next expected bus timing.",
+          ),
+        );
+        busETA = response.text?.trim() ?? 'Unavailable';
+      } catch (e) {
+        busETA = 'AI Error: Check API Key/Model';
+      }
+    }
+
+    // Estimate occupancy
+    final hour = DateTime.now().hour;
+    final isPeakHours = hour >= 10 && hour <= 16;
+    final baseOccupancy = isPeakHours ? 75 : 30;
+    final forumOccupancy = min(100, baseOccupancy + Random().nextInt(15));
+    final stLukesOccupancy = min(100, (baseOccupancy * 0.8).toInt() + Random().nextInt(15));
+
+    if (!_controller!.isClosed) {
+      _controller!.add({
+        'forum': forumOccupancy,
+        'stlukes': stLukesOccupancy,
+        'bus': busETA,
+        'weather': weatherStr,
+      });
+    }
+  }
+
   String _getWeatherEmoji(int code) {
     if (code == 0) return 'Clear ☀️';
     if (code >= 1 && code <= 3) return 'Cloudy ⛅';
@@ -48,89 +137,12 @@ class _DashboardScreenState extends State<DashboardScreen> {
     return 'Unknown 🌍';
   }
 
-  // Generates a continuous stream of dashboard data
-  Stream<Map<String, dynamic>> _fetchExeterData(
-    String apiKey,
-    String modelName,
-  ) async* {
-    while (true) {
-      String weatherStr = 'Fetching...';
-      String busETA = 'Loading...';
-
-      // Fetch weather from Open-Meteo for Exeter coordinates
-      try {
-        final res = await http.get(
-          Uri.parse(
-            'https://api.open-meteo.com/v1/forecast?latitude=50.7352&longitude=-3.5328&current_weather=true',
-          ),
-        );
-        if (res.statusCode == 200) {
-          final data = jsonDecode(res.body);
-          final temp = data['current_weather']['temperature'];
-          final code = data['current_weather']['weathercode'];
-          weatherStr = '$temp°C, ${_getWeatherEmoji(code)}';
-        } else {
-          weatherStr = 'Unavailable';
-        }
-      } catch (e) {
-        weatherStr = 'Offline';
-      }
-
-      // Fetch bus schedule estimates using Gemini as an agent
-      if (apiKey.trim().isEmpty) {
-        busETA = 'API Key required (Check Settings)';
-      } else {
-        try {
-          final model = GenerativeModel(
-            model: modelName,
-            apiKey: apiKey,
-            systemInstruction: Content.system(
-              'You are an assistant providing transit schedule insights for the University of Exeter. '
-              'Provide an extremely concise output. No pleasantries.',
-            ),
-          );
-          final chat = model.startChat();
-          final response = await chat.sendMessage(
-            Content.text(
-              "What is the typical schedule or next expected time for the Stagecoach UNI or 4 bus or 4A bus from the University of Exeter right now? Respond with just a short phrase like 'In 10 mins' or 'Every 15 mins', also specifies time in HH:mm format (24 hours format) of next expected bus timing.",
-            ),
-          );
-
-          busETA = response.text?.trim() ?? 'Unavailable';
-        } catch (e) {
-          busETA = 'AI Error: Check API Key/Model';
-        }
-      }
-
-      // Estimate library occupancy based on the current time of day
-      final hour = DateTime.now().hour;
-      final isPeakHours = hour >= 10 && hour <= 16;
-      final baseOccupancy = isPeakHours ? 75 : 30;
-
-      final forumOccupancy = min(100, baseOccupancy + Random().nextInt(15));
-      final stLukesOccupancy = min(
-        100,
-        (baseOccupancy * 0.8).toInt() + Random().nextInt(15),
-      );
-
-      yield {
-        'forum': forumOccupancy,
-        'stlukes': stLukesOccupancy,
-        'bus': busETA,
-        'weather': weatherStr,
-      };
-
-      // Wait a minute before checking for updates again
-      await Future.delayed(const Duration(seconds: 60));
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('Campus Live Data'), centerTitle: true),
       body: StreamBuilder<Map<String, dynamic>>(
-        stream: _dataStream,
+        stream: _controller?.stream,
         builder: (context, snapshot) {
           if (!snapshot.hasData) {
             return const Center(
@@ -147,19 +159,14 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
           final data = snapshot.data!;
           return RefreshIndicator(
-            onRefresh: () async {
-              setState(() {
-                _dataStream = _fetchExeterData(_lastApiKey!, _lastModel!);
-              });
-            },
+            onRefresh: _fetchOnce,
             child: ListView(
               padding: const EdgeInsets.all(16),
+              physics: const AlwaysScrollableScrollPhysics(),
               children: [
                 Text(
                   'Live Updates',
-                  style: Theme.of(
-                    context,
-                  ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+                  style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 16),
                 DashboardCard(

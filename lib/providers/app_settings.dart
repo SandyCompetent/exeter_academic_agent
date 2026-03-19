@@ -10,8 +10,8 @@ class AppSettings extends ChangeNotifier {
   
   String _apiKey = _defaultApiKey;
 
-  String _selectedModel = 'gemini-1.5-flash';
-  List<String> _availableModels = ['gemini-1.5-flash'];
+  String _selectedModel = 'gemini-2.5-flash';
+  List<String> _availableModels = ['gemini-2.5-flash'];
 
   bool _isLoadingModels = false;
   String? _modelError;
@@ -100,10 +100,10 @@ class AppSettings extends ChangeNotifier {
           _availableModels = validModels;
           if (!_availableModels.contains(_selectedModel)) {
             // Try to default to a modern model if current choice is unavailable
-            if (validModels.contains('gemini-2.0-flash')) {
-              _selectedModel = 'gemini-2.0-flash';
-            } else if (validModels.contains('gemini-1.5-flash')) {
-              _selectedModel = 'gemini-1.5-flash';
+            if (validModels.contains('gemini-2.5-flash')) {
+              _selectedModel = 'gemini-2.5-flash';
+            } else if (validModels.contains('gemini-3.0-flash')) {
+              _selectedModel = 'gemini-3.0-flash';
             } else {
               _selectedModel = _availableModels.first;
             }
